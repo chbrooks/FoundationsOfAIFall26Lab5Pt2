@@ -1,0 +1,178 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Wildfire Ignition Network</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: single teaching column; graph on top, scenarios beside the tables below. */
+:root{
+  --bg:#f6f7f9; --surface:#ffffff; --fg:#1b2230; --muted:#5d6676; --line:#d5dae2;
+  --edge:#8a93a3; --accent:#2f5fd0; --accent-soft:#e3eafb;
+  --t-bg:#d8f1e7; --t-line:#2f8f6a; --f-bg:#f8dfe0; --f-line:#b8474f;
+  --up:#2f8f6a; --down:#b8474f;
+  --display:"Newsreader",Georgia,"Times New Roman",serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12161d; --surface:#1a2029; --fg:#e6e9ef; --muted:#9aa3b2; --line:#2d3542;
+  --edge:#7c8698; --accent:#7ea2f2; --accent-soft:#223152;
+  --t-bg:#173a2e; --t-line:#5cc49c; --f-bg:#3d1f24; --f-line:#e48890;
+  --up:#5cc49c; --down:#e48890; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12161d; --surface:#1a2029; --fg:#e6e9ef; --muted:#9aa3b2; --line:#2d3542;
+  --edge:#7c8698; --accent:#7ea2f2; --accent-soft:#223152;
+  --t-bg:#173a2e; --t-line:#5cc49c; --f-bg:#3d1f24; --f-line:#e48890;
+  --up:#5cc49c; --down:#e48890; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.55}
+.wrap{max-width:980px;margin:0 auto;padding-block:32px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:24px}
+h1{font-family:var(--display);font-weight:600;font-size:2rem;line-height:1.15;margin:0;text-wrap:balance}
+h2{font-family:var(--display);font-weight:500;font-size:1.3rem;margin:0 0 10px}
+.lede{color:var(--muted);max-width:65ch;margin:6px 0 0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px}
+.graphscroll{overflow-x:auto}
+svg{display:block;width:100%;min-width:520px;height:auto}
+.node{cursor:pointer}
+.node rect.box{fill:var(--surface);stroke:var(--line);stroke-width:1.2}
+.node:hover rect.box{stroke:var(--accent)}
+.node.t rect.box{fill:var(--t-bg);stroke:var(--t-line)}
+.node.f rect.box{fill:var(--f-bg);stroke:var(--f-line)}
+.node:focus{outline:none}
+.node:focus-visible rect.box{stroke:var(--accent);stroke-width:2.5}
+.nm{font-family:var(--body);font-weight:600;font-size:15px;fill:var(--fg)}
+.sub{font-family:var(--mono);font-size:12.5px;fill:var(--muted)}
+.sub .up{fill:var(--up)} .sub .down{fill:var(--down)}
+.track{fill:var(--line)} .bar{fill:var(--accent)}
+.edge{stroke:var(--edge);stroke-width:1.5;fill:none}
+.mk{fill:none;stroke:var(--edge);stroke-width:1.5}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:13px;color:var(--muted);margin-top:10px}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:6px;border:1px solid}
+.status{font-size:13px;color:var(--muted);margin-top:6px;min-height:1.4em}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:24px}
+@media (max-width:760px){.cols{grid-template-columns:1fr}}
+.scen{display:flex;flex-direction:column;gap:8px}
+.scen button{all:unset;box-sizing:border-box;cursor:pointer;display:block;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.scen button:hover{border-color:var(--accent)}
+.scen button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.scen button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.scen b{display:block;font-weight:600;font-size:14px}
+.scen span{display:block;font-size:13px;color:var(--muted);margin-top:2px}
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.btn{font:inherit;font-size:13px;background:transparent;color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:6px 12px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.cpts{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.cpt{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;min-width:0}
+.cpt h3{font-size:13px;font-weight:600;margin:0 0 6px}
+.cpt table{border-collapse:collapse;width:100%;font-size:12.5px;font-variant-numeric:tabular-nums}
+.cpt th{text-align:left;font-weight:500;color:var(--muted);padding:2px 4px;font-size:11px;letter-spacing:.04em;text-transform:uppercase}
+.cpt td{padding:2px 4px;font-family:var(--mono)}
+.cpt input{font-family:var(--mono);font-size:12.5px;width:76px;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:4px;padding:3px 5px}
+.cpt input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.foot{font-size:13px;color:var(--muted);max-width:65ch}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Wildfire Ignition Network</h1>
+    <p class="lede">A wildfire investigation with the same structure as the classic Asia network. Click a node to set it true, then false, then unknown. Every other node shows P(true) given the evidence, and ▲/▼ shows how far it moved after your last change. The probabilities are illustrative, not real fire data.</p>
+  </header>
+
+  <section class="panel" aria-label="Network">
+    <div class="graphscroll">
+      <svg viewBox="0 0 680 430" role="img" aria-labelledby="gt gd">
+        <title id="gt">Wildfire Ignition Network</title>
+        <desc id="gd">Storm season causes Lightning strike. Aging grid causes Line spark and Overgrown brush. Lightning strike and Line spark cause Fire ignited. Fire ignited causes Smoke spotted. Fire ignited and Overgrown brush cause Large wildfire.</desc>
+        <defs><marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk" d="M2 1L8 5L2 9" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+        <g id="edges"></g><g id="nodes"></g>
+      </svg>
+    </div>
+    <div class="legend">
+      <span><span class="sw" style="background:var(--t-bg);border-color:var(--t-line)"></span>Observed true</span>
+      <span><span class="sw" style="background:var(--f-bg);border-color:var(--f-line)"></span>Observed false</span>
+      <span><span class="sw" style="background:var(--accent);border-color:var(--accent)"></span>Bar = P(true)</span>
+    </div>
+    <div class="status" id="status" aria-live="polite"></div>
+  </section>
+
+  <div class="cols">
+    <section>
+      <h2>Scenarios</h2>
+      <div class="scen" id="scen"></div>
+      <div class="tools">
+        <button class="btn" id="resetEv">Clear evidence</button>
+        <button class="btn" id="resetT">Restore original tables</button>
+      </div>
+    </section>
+    <section>
+      <h2>Conditional probability tables</h2>
+      <div class="cpts" id="cpts"></div>
+      <p class="foot">Each row gives P(variable = true) for one combination of its parents. Edit any value to see how the numbers change. The d-separation results (where a node shows “no change”) hold no matter what values you enter.</p>
+    </section>
+  </div>
+</div>
+
+<script>
+(function(){
+const N={A:['Storm season',170,50],S:['Aging grid',510,50],T:['Lightning strike',100,160],L:['Line spark',340,160],B:['Overgrown brush',575,160],E:['Fire ignited',220,270],X:['Smoke spotted',120,380],D:['Large wildfire',440,380]};
+const PA={A:[],S:[],T:['A'],L:['S'],B:['S'],E:['T','L'],X:['E'],D:['E','B']};
+const C0={A:[.3],S:[.4],T:[.4,.05],L:[.3,.05],B:[.6,.2],E:[.88,.6,.7,.01],X:[.9,.05],D:[.7,.25,0,0]};
+const SC=[
+ {t:'Smoke spotted',d:'Both ignition sources become more likely, and so does the aging grid behind the line spark.',s:[['X',true]]},
+ {t:'Smoke, then lightning confirmed',d:'Line spark and Aging grid both fall. Lightning explains the fire, which is the utility\'s argument in a liability case.',s:[['X',true],['T',true]]},
+ {t:'Lightning vs spark, given a fire',d:'Confirming the fire first, then lightning. A direct collider: proving one cause lowers the other.',s:[['E',true],['T',true]]},
+ {t:'Storm season only',d:'Aging grid, Line spark and Overgrown brush show no change. With no fire information they are d-separated from the weather.',s:[['A',true]]},
+ {t:'Fire ignited, then storm season',d:'Overgrown brush moves even though the fire is known. Conditioning on the collider opens a path through the grid.',s:[['E',true],['A',true]]}
+];
+const svgNS='http://www.w3.org/2000/svg',K=Object.keys(N),W=1<<K.length,$=id=>document.getElementById(id);
+let C=JSON.parse(JSON.stringify(C0)),ev={},cur=null,prev=null,active=-1;
+const f=p=>p.toFixed(3);
+function infer(){let tot=0;const pt={};K.forEach(k=>pt[k]=0);
+ for(let m=0;m<W;m++){const v={};K.forEach((k,i)=>v[k]=!!((m>>i)&1));
+  let ok=true;for(const k in ev)if(v[k]!==ev[k]){ok=false;break;}if(!ok)continue;
+  let p=1;for(const k of K){let idx=0;PA[k].forEach(q=>{idx=idx*2+(v[q]?0:1);});const t=C[k][idx];p*=v[k]?t:1-t;if(p===0)break;}
+  tot+=p;K.forEach(k=>{if(v[k])pt[k]+=p;});}
+ if(tot===0)return null;K.forEach(k=>pt[k]/=tot);return pt;}
+function tog(k){prev=cur;if(!(k in ev))ev[k]=true;else if(ev[k])ev[k]=false;else delete ev[k];active=-1;cur=infer();draw();}
+function runScen(i){const st=SC[i].s;ev={};st.slice(0,-1).forEach(([k,v])=>ev[k]=v);prev=infer();const[k,v]=st[st.length-1];ev[k]=v;active=i;cur=infer();draw();}
+function drawEdges(){let h='';K.forEach(b=>PA[b].forEach(a=>{const[,x1,y1]=N[a],[,x2,y2]=N[b];const dx=x2-x1,dy=y2-y1;
+ const t=Math.min(dx?92/Math.abs(dx):1e9,dy?32/Math.abs(dy):1e9),g=Math.min(dx?97/Math.abs(dx):1e9,dy?37/Math.abs(dy):1e9);
+ h+=`<line class="edge" x1="${x1+dx*t}" y1="${y1+dy*t}" x2="${x2-dx*g}" y2="${y2-dy*g}" marker-end="url(#arr)"/>`;}));$('edges').innerHTML=h;}
+function draw(){
+ let h='';K.forEach(k=>{const[nm,x,y]=N[k];const o=k in ev;const cls=o?(ev[k]?'t':'f'):'';
+  let sub,p=null;
+  if(o){sub='observed '+(ev[k]?'true':'false');p=ev[k]?1:0;}
+  else if(!cur)sub='—';
+  else{p=cur[k];sub='P = '+f(p);
+   if(prev){const d=cur[k]-prev[k];sub+=Math.abs(d)>=0.0005?` <tspan class="${d>0?'up':'down'}">${d>0?'▲':'▼'}${f(Math.abs(d))}</tspan>`:' · no change';}}
+  const bw=p===null?0:Math.max(p>0?2:0,160*p);
+  h+=`<g class="node ${cls}" tabindex="0" role="button" data-k="${k}" aria-label="${nm}, ${o?'observed '+(ev[k]?'true':'false'):'unknown'}. Activate to change.">
+   <rect class="box" x="${x-90}" y="${y-30}" width="180" height="60" rx="9"/>
+   <text class="nm" x="${x}" y="${y-11}" text-anchor="middle" dominant-baseline="central">${nm}</text>
+   <text class="sub" x="${x}" y="${y+8}" text-anchor="middle" dominant-baseline="central">${sub}</text>
+   <rect class="track" x="${x-80}" y="${y+19}" width="160" height="4" rx="2"/>
+   <rect class="bar" x="${x-80}" y="${y+19}" width="${bw}" height="4" rx="2"/></g>`;});
+ $('nodes').innerHTML=h;
+ $('nodes').querySelectorAll('.node').forEach(g=>{g.addEventListener('click',()=>tog(g.dataset.k));
+  g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();const k=g.dataset.k;tog(k);const n=$('nodes').querySelector(`[data-k="${k}"]`);n&&n.focus();}});});
+ $('status').textContent=!cur?'That combination of evidence is impossible under these tables (probability 0).':prev?'▲/▼ show the change caused by the last piece of evidence.':'Probabilities given the current evidence.';
+ document.querySelectorAll('#scen button').forEach((b,i)=>b.setAttribute('aria-pressed',i===active?'true':'false'));
+}
+function buildCPT(){let h='';K.forEach(k=>{const pa=PA[k],n=pa.length;
+ h+=`<div class="cpt"><h3>${N[k][0]}</h3><table><thead><tr>`;
+ pa.forEach(q=>h+=`<th>${N[q][0]}</th>`);h+=`<th>P(true)</th></tr></thead><tbody>`;
+ for(let i=0;i<(1<<n);i++){h+='<tr>';for(let j=0;j<n;j++)h+=`<td>${(i>>(n-1-j))&1?'F':'T'}</td>`;
+  h+=`<td><input id="cpt-${k}-${i}" type="number" min="0" max="1" step="0.05" value="${C[k][i]}" data-k="${k}" data-i="${i}" aria-label="P(${N[k][0]} true), row ${i+1}"></td></tr>`;}
+ h+='</tbody></table></div>';});
+ $('cpts').innerHTML=h;
+ $('cpts').querySelectorAll('input').forEach(inp=>inp.addEventListener('input',e=>{let v=parseFloat(e.target.value);if(isNaN(v))return;v=Math.max(0,Math.min(1,v));C[e.target.dataset.k][+e.target.dataset.i]=v;prev=null;active=-1;cur=infer();draw();}));}
+$('scen').innerHTML=SC.map((s,i)=>`<button type="button" data-i="${i}" aria-pressed="false"><b>${s.t}</b><span>${s.d}</span></button>`).join('');
+$('scen').querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>runScen(+b.dataset.i)));
+$('resetEv').addEventListener('click',()=>{ev={};prev=null;active=-1;cur=infer();draw();});
+$('resetT').addEventListener('click',()=>{C=JSON.parse(JSON.stringify(C0));prev=null;active=-1;cur=infer();buildCPT();draw();});
+drawEdges();buildCPT();cur=infer();draw();
+})();
+</script>
+
+</body></html>

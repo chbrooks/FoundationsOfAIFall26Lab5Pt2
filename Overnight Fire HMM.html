@@ -1,0 +1,248 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Overnight Fire HMM</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one teaching column; model diagram, then the timeline grid as the centerpiece, then joint state and parameters. */
+:root{
+  --bg:#f6f7f9; --surface:#ffffff; --fg:#1b2230; --muted:#5d6676; --line:#d5dae2;
+  --edge:#8a93a3; --accent:#2f5fd0; --accent-soft:#e3eafb;
+  --fire:#d9622b; --dry:#b8891c; --obs:#eef1f5;
+  --display:"Newsreader",Georgia,"Times New Roman",serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12161d; --surface:#1a2029; --fg:#e6e9ef; --muted:#9aa3b2; --line:#2d3542;
+  --edge:#7c8698; --accent:#7ea2f2; --accent-soft:#223152;
+  --fire:#c4572a; --dry:#a07a1e; --obs:#232a35; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12161d; --surface:#1a2029; --fg:#e6e9ef; --muted:#9aa3b2; --line:#2d3542;
+  --edge:#7c8698; --accent:#7ea2f2; --accent-soft:#223152;
+  --fire:#c4572a; --dry:#a07a1e; --obs:#232a35; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.55}
+.wrap{max-width:1020px;margin:0 auto;padding-block:32px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:24px}
+h1{font-family:var(--display);font-weight:600;font-size:2rem;line-height:1.15;margin:0;text-wrap:balance}
+h2{font-family:var(--display);font-weight:500;font-size:1.3rem;margin:0 0 10px;text-wrap:balance}
+p{margin:0}
+.lede{color:var(--muted);max-width:68ch;margin-top:6px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0}
+.two{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:820px){.two{grid-template-columns:1fr}}
+.scroll{overflow-x:auto}
+svg.dbn{display:block;width:100%;min-width:440px;height:auto}
+.hn rect{fill:var(--surface);stroke:var(--fg);stroke-width:1.2}
+.on rect{fill:var(--obs);stroke:var(--edge);stroke-width:1;stroke-dasharray:4 3}
+.nt{font-family:var(--body);font-size:13px;font-weight:500;fill:var(--fg)}
+.st{font-family:var(--mono);font-size:11px;fill:var(--muted)}
+.e{stroke:var(--edge);stroke-width:1.4;fill:none}
+.ex{stroke:var(--fire);stroke-width:1.8;fill:none}
+.mk{fill:none;stroke:var(--edge);stroke-width:1.5}
+.mkx{fill:none;stroke:var(--fire);stroke-width:1.5}
+.small{font-size:13px;color:var(--muted)}
+ul.facts{margin:8px 0 0;padding-left:18px;font-size:14px;display:flex;flex-direction:column;gap:4px}
+.presets{display:flex;flex-wrap:wrap;gap:8px}
+.btn{font:inherit;font-size:13px;background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:6px;padding:6px 12px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.btn:focus-visible,.cell:focus-visible,.hr:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.pdesc{font-size:13px;color:var(--muted);margin-top:8px;min-height:1.4em}
+table.tl{border-collapse:separate;border-spacing:3px;width:100%;min-width:760px;font-variant-numeric:tabular-nums}
+.tl th,.tl td{font-size:12.5px;text-align:center;padding:0}
+.tl th.rl{text-align:left;font-weight:500;color:var(--muted);white-space:nowrap;padding-right:8px;font-size:12.5px;width:150px}
+.tl th.grp{text-align:left;font-family:var(--display);font-weight:500;font-size:1.05rem;color:var(--fg);padding-top:12px}
+.hr{all:unset;box-sizing:border-box;display:block;width:100%;cursor:pointer;font-family:var(--mono);font-size:12px;color:var(--muted);padding:4px 0;border-radius:4px}
+.hr.sel{background:var(--accent-soft);color:var(--fg);font-weight:500}
+.cell{all:unset;box-sizing:border-box;display:block;width:100%;height:30px;line-height:30px;border-radius:5px;font-family:var(--mono);cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--muted)}
+.cell.on{background:var(--obs);color:var(--fg);font-weight:600;border-color:var(--edge)}
+.cell:hover{border-color:var(--accent)}
+.pv{height:30px;line-height:30px;border-radius:5px;font-family:var(--mono);font-size:12px;color:var(--fg)}
+.vit{height:30px;line-height:30px;border-radius:5px;font-size:11.5px;font-weight:600}
+.vit.y{color:#fff}
+.vit.n{color:var(--muted);border:1px dashed var(--line)}
+.selcol{box-shadow:inset 0 0 0 2px var(--accent)}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:13px;color:var(--muted);margin-top:10px}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:6px}
+.joint{display:flex;flex-direction:column;gap:10px}
+.jrow{display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px;align-items:center;font-size:13px}
+.jbars{display:flex;flex-direction:column;gap:3px}
+.jb{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+.jb .tr{flex:1;height:8px;background:var(--obs);border-radius:4px;overflow:hidden}
+.jb .fl{height:100%;border-radius:4px}
+.jb .fl.f{background:var(--edge)} .jb .fl.s{background:var(--accent)}
+.jb .v{width:40px;text-align:right}
+.tag{display:inline-block;font-size:11px;font-weight:600;color:var(--accent);margin-left:6px}
+.params{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.pg h3{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
+.pr{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;padding:3px 0}
+.pr input{font-family:var(--mono);font-size:12.5px;width:70px;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:4px;padding:3px 5px}
+.pr input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Overnight Fire HMM</h1>
+    <p class="lede">A ranger station gets hourly readings for 12 hours. By the end a fire is clearly burning. Two hidden variables (fuel and fire) evolve over time, and two sensors watch them. Compare what an operator believed in real time (forward), what an investigator believes with every reading in hand (smoothed), and the single most likely history (Viterbi).</p>
+  </header>
+
+  <div class="two">
+    <section class="panel">
+      <h2>The model, unrolled over time</h2>
+      <div class="scroll">
+        <svg class="dbn" viewBox="0 0 680 300" role="img" aria-labelledby="dt dd">
+          <title id="dt">Two-chain dynamic Bayesian network</title>
+          <desc id="dd">Three time slices. Fuel at each hour causes the humidity reading and next hour's fuel. Fire at each hour causes the hotspot reading and next hour's fire. Fuel at each hour also affects next hour's fire.</desc>
+          <defs>
+            <marker id="m1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk" d="M2 1L8 5L2 9" stroke-linecap="round" stroke-linejoin="round"/></marker>
+            <marker id="m2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mkx" d="M2 1L8 5L2 9" stroke-linecap="round" stroke-linejoin="round"/></marker>
+          </defs>
+          <g id="dbn"></g>
+        </svg>
+      </div>
+      <div class="legend">
+        <span><span class="sw" style="border:1.2px solid var(--fg)"></span>Hidden</span>
+        <span><span class="sw" style="background:var(--obs);border:1px dashed var(--edge)"></span>Observed</span>
+        <span><span class="sw" style="background:var(--fire)"></span>Dry fuel raises ignition</span>
+      </div>
+    </section>
+    <section class="panel">
+      <h2>Why it is still an HMM</h2>
+      <p class="small">Merge the two hidden variables into one joint state with 2 × 2 = 4 values. Forward, smoothing and Viterbi then run unchanged on that state. Because each sensor depends on only one variable, the emission probability is just the product of the two sensor probabilities.</p>
+      <ul class="facts">
+        <li><b>Forward</b> uses readings up to hour t.</li>
+        <li><b>Smoothed</b> uses all 12 hours, so later readings revise earlier hours.</li>
+        <li><b>Viterbi</b> picks the most likely complete history, which can differ from the hour-by-hour most likely values.</li>
+        <li>Adding a third binary hidden variable would double the joint state to 8. It grows exponentially.</li>
+      </ul>
+    </section>
+  </div>
+
+  <section class="panel">
+    <h2>Timeline</h2>
+    <div class="presets" id="presets"></div>
+    <p class="pdesc" id="pdesc"></p>
+    <div class="scroll" style="margin-top:8px"><table class="tl" id="tl"></table></div>
+    <div class="legend">
+      <span>Click a reading to flip it · click an hour to inspect it</span>
+      <span><span class="sw" style="background:var(--fire)"></span>P(burning)</span>
+      <span><span class="sw" style="background:var(--dry)"></span>P(dry)</span>
+    </div>
+  </section>
+
+  <div class="two">
+    <section class="panel">
+      <h2 id="jtitle">Joint state at hour 8</h2>
+      <div class="joint" id="joint"></div>
+      <div class="legend">
+        <span><span class="sw" style="background:var(--edge)"></span>Forward</span>
+        <span><span class="sw" style="background:var(--accent)"></span>Smoothed</span>
+        <span><span class="tag" style="margin:0">VITERBI</span> state on the most likely path</span>
+      </div>
+    </section>
+    <section class="panel">
+      <h2>Model parameters</h2>
+      <div class="params" id="params"></div>
+      <div style="margin-top:12px"><button class="btn" id="resetP">Restore original parameters</button></div>
+    </section>
+  </div>
+</div>
+
+<script>
+(function(){
+const T=12,$=id=>document.getElementById(id);
+const P0={pD0:.3,pB0:.01,dd:.9,md:.15,bb:.9,igd:.10,igm:.01,h1:.7,h0:.05,l1:.8,l0:.15};
+const PG=[
+ ['Hour 1',[['pD0','P(fuel dry)'],['pB0','P(burning)']]],
+ ['Fuel over time',[['dd','Dry stays dry'],['md','Moist turns dry']]],
+ ['Fire over time',[['bb','Burning keeps burning'],['igd','Ignites if fuel was dry'],['igm','Ignites if fuel was moist']]],
+ ['Sensors',[['h1','Hotspot | burning'],['h0','Hotspot | not burning'],['l1','Low humidity | dry'],['l0','Low humidity | moist']]]
+];
+const BASE={H:[0,1,0,0,0,0,0,1,0,1,1,1],L:[0,0,1,1,1,1,1,1,1,1,1,1]};
+const PRE=[
+ {n:'Original readings',d:'A hotspot at hour 2, humidity drops from hour 3, then hotspots from hour 8 with one miss at hour 9.',f:o=>o},
+ {n:'Remove the false alarm',d:'No hotspot at hour 2. Forward no longer spikes early, and the rest of the story barely changes.',f:o=>{o.H[1]=0;return o;}},
+ {n:'Fill in the missed detection',d:'A hotspot at hour 9 too. Forward stops dipping, so the gap between forward and smoothed closes.',f:o=>{o.H[8]=1;return o;}},
+ {n:'Humidity stays normal',d:'Fuel stays moist, so new ignitions are rare. Forward is much slower to trust the hour 8 hotspot, while smoothing still recovers the fire from the later readings.',f:o=>{o.L=o.L.map(()=>0);return o;}}
+];
+let P={...P0},obs=clone(BASE),sel=7,pre=0;
+function clone(o){return {H:[...o.H],L:[...o.L]};}
+// joint state index = dry*2 + burn
+const ST=[[0,0],[0,1],[1,0],[1,1]];
+const NAMES=['Moist, not burning','Moist, burning','Dry, not burning','Dry, burning'];
+const b=(p,x)=>x?p:1-p;
+function trans(a,c){const[d0,f0]=ST[a],[d1,f1]=ST[c];const pd=d0?P.dd:P.md;const pf=f0?P.bb:(d0?P.igd:P.igm);return b(pd,d1)*b(pf,f1);}
+function emit(s,t){const[d,f]=ST[s];return b(f?P.h1:P.h0,obs.H[t])*b(d?P.l1:P.l0,obs.L[t]);}
+function run(){
+ const A=ST.map((_,a)=>ST.map((_,c)=>trans(a,c)));
+ const E=[];for(let t=0;t<T;t++)E.push(ST.map((_,s)=>emit(s,t)));
+ const pi=ST.map(([d,f])=>b(P.pD0,d)*b(P.pB0,f));
+ const norm=v=>{const z=v.reduce((x,y)=>x+y,0);return z>0?v.map(x=>x/z):v.map(()=>NaN);};
+ const fw=[norm(pi.map((p,s)=>p*E[0][s]))];
+ for(let t=1;t<T;t++)fw.push(norm(ST.map((_,c)=>E[t][c]*fw[t-1].reduce((acc,p,a)=>acc+p*A[a][c],0))));
+ const bw=Array(T);bw[T-1]=[1,1,1,1];
+ for(let t=T-2;t>=0;t--)bw[t]=norm(ST.map((_,a)=>ST.reduce((acc,_,c)=>acc+A[a][c]*E[t+1][c]*bw[t+1][c],0)));
+ const sm=fw.map((f,t)=>norm(f.map((p,s)=>p*bw[t][s])));
+ const lg=x=>Math.log(x);let v=pi.map((p,s)=>lg(p)+lg(E[0][s]));const bp=[];
+ for(let t=1;t<T;t++){const nv=[],nb=[];ST.forEach((_,c)=>{let best=-Infinity,arg=0;ST.forEach((_,a)=>{const s=v[a]+lg(A[a][c]);if(s>best){best=s;arg=a;}});nv.push(best+lg(E[t][c]));nb.push(arg);});v=nv;bp.push(nb);}
+ let last=0;v.forEach((x,i)=>{if(x>v[last])last=i;});
+ const ok=isFinite(v[last]);const path=[last];for(let t=T-2;t>=0;t--)path.unshift(bp[t][path[0]]);
+ return {fw,sm,path:ok?path:null};
+}
+const mf=d=>d[1]+d[3], md=d=>d[2]+d[3];
+function shade(p,v){if(!isFinite(p))return 'background:var(--obs)';const k=Math.round(p*78);return `background:color-mix(in srgb, var(${v}) ${k}%, var(--surface))`;}
+function pcell(p,v){return `<div class="pv" style="${shade(p,v)}">${isFinite(p)?p.toFixed(2):'—'}</div>`;}
+function render(){
+ const r=run();
+ let h='<thead><tr><th class="rl">Hour</th>';
+ for(let t=0;t<T;t++)h+=`<th><button class="hr ${t===sel?'sel':''}" data-t="${t}" aria-label="Inspect hour ${t+1}">${t+1}</button></th>`;
+ h+='</tr></thead><tbody>';
+ h+=`<tr><th class="grp" colspan="${T+1}">Readings</th></tr>`;
+ [['H','Hotspot detected'],['L','Low humidity']].forEach(([k,lab])=>{
+  h+=`<tr><th class="rl">${lab}</th>`;
+  for(let t=0;t<T;t++){const on=obs[k][t];h+=`<td><button class="cell ${on?'on':''}" data-k="${k}" data-t="${t}" aria-pressed="${on?'true':'false'}" aria-label="${lab}, hour ${t+1}: ${on?'yes':'no'}">${on?'✓':'–'}</button></td>`;}
+  h+='</tr>';});
+ const block=(title,fn,v,yes,no,idx)=>{
+  let s=`<tr><th class="grp" colspan="${T+1}">${title}</th></tr>`;
+  s+=`<tr><th class="rl">Forward P(${yes.toLowerCase()})</th>`;for(let t=0;t<T;t++)s+=`<td>${pcell(fn(r.fw[t]),v)}</td>`;s+='</tr>';
+  s+=`<tr><th class="rl">Smoothed P(${yes.toLowerCase()})</th>`;for(let t=0;t<T;t++)s+=`<td>${pcell(fn(r.sm[t]),v)}</td>`;s+='</tr>';
+  s+=`<tr><th class="rl">Viterbi</th>`;
+  for(let t=0;t<T;t++){if(!r.path){s+='<td><div class="vit n">—</div></td>';continue;}const on=ST[r.path[t]][idx];
+   s+=on?`<td><div class="vit y" style="background:var(${v})">${yes}</div></td>`:`<td><div class="vit n">${no}</div></td>`;}
+  return s+'</tr>';};
+ h+=block('Fire',mf,'--fire','Burning','No',1);
+ h+=block('Fuel',md,'--dry','Dry','Moist',0);
+ h+='</tbody>';
+ $('tl').innerHTML=h;
+ $('tl').querySelectorAll('.cell').forEach(c=>c.addEventListener('click',()=>{const k=c.dataset.k,t=+c.dataset.t;obs[k][t]=obs[k][t]?0:1;pre=-1;render();focusSel(`.cell[data-k="${k}"][data-t="${t}"]`);}));
+ $('tl').querySelectorAll('.hr').forEach(c=>c.addEventListener('click',()=>{sel=+c.dataset.t;render();focusSel(`.hr[data-t="${sel}"]`);}));
+ $('jtitle').textContent=`Joint state at hour ${sel+1}`;
+ let j='';ST.forEach((_,s)=>{const f=r.fw[sel][s],m=r.sm[sel][s],vit=r.path&&r.path[sel]===s;
+  const bar=(cls,p)=>`<div class="jb"><span style="width:58px">${cls==='f'?'forward':'smoothed'}</span><div class="tr"><div class="fl ${cls}" style="width:${isFinite(p)?p*100:0}%"></div></div><span class="v">${isFinite(p)?p.toFixed(2):'—'}</span></div>`;
+  j+=`<div class="jrow"><div>${NAMES[s]}${vit?'<span class="tag">VITERBI</span>':''}</div><div class="jbars">${bar('f',f)}${bar('s',m)}</div></div>`;});
+ if(!r.path)j+='<p class="small">These readings are impossible under the current parameters. Raise any probability set to 0 or 1.</p>';
+ $('joint').innerHTML=j;
+ document.querySelectorAll('#presets .btn').forEach((x,i)=>x.setAttribute('aria-pressed',i===pre?'true':'false'));
+ $('pdesc').textContent=pre>=0?PRE[pre].d:'Custom readings. Pick a preset to start over.';
+}
+function focusSel(q){const el=$('tl').querySelector(q);el&&el.focus();}
+$('presets').innerHTML=PRE.map((p,i)=>`<button class="btn" data-i="${i}" aria-pressed="false">${p.n}</button>`).join('');
+$('presets').querySelectorAll('.btn').forEach(x=>x.addEventListener('click',()=>{pre=+x.dataset.i;obs=PRE[pre].f(clone(BASE));render();}));
+function buildParams(){let h='';PG.forEach(([g,rows])=>{h+=`<div class="pg"><h3>${g}</h3>`;rows.forEach(([k,lab])=>h+=`<label class="pr" for="p-${k}"><span>${lab}</span><input id="p-${k}" type="number" min="0" max="1" step="0.01" value="${P[k]}" data-k="${k}"></label>`);h+='</div>';});
+ $('params').innerHTML=h;
+ $('params').querySelectorAll('input').forEach(i=>i.addEventListener('input',e=>{let v=parseFloat(e.target.value);if(isNaN(v))return;P[e.target.dataset.k]=Math.max(0,Math.min(1,v));render();}));}
+$('resetP').addEventListener('click',()=>{P={...P0};buildParams();render();});
+// diagram
+(function(){const xs=[110,340,570],lab=['t − 1','t','t + 1'];const Y={hum:38,fuel:112,fire:188,hot:262};let g='';
+ const box=(x,y,t,cls)=>`<g class="${cls}"><rect x="${x-62}" y="${y-18}" width="124" height="36" rx="${cls==='hn'?18:6}"/><text class="nt" x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central">${t}</text></g>`;
+ const ln=(x1,y1,x2,y2,c)=>`<line class="${c?'ex':'e'}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" marker-end="url(#${c?'m2':'m1'})"/>`;
+ xs.forEach((x,i)=>{g+=ln(x,Y.fuel-19,x,Y.hum+21)+ln(x,Y.fire+19,x,Y.hot-21);
+  if(i<2){const nx=xs[i+1];g+=ln(x+63,Y.fuel,nx-66,Y.fuel)+ln(x+63,Y.fire,nx-66,Y.fire)+ln(x+52,Y.fuel+14,nx-56,Y.fire-14,1);}});
+ xs.forEach((x,i)=>{g+=box(x,Y.hum,'Low humidity','on')+box(x,Y.fuel,'Fuel','hn')+box(x,Y.fire,'Fire','hn')+box(x,Y.hot,'Hotspot','on')+`<text class="st" x="${x}" y="292" text-anchor="middle">${lab[i]}</text>`;});
+ $('dbn').innerHTML=g;})();
+buildParams();render();
+})();
+</script>
+
+</body></html>
